@@ -3,7 +3,6 @@
   "devCommand": "npm run dev",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "serverlessFunctionRegion": "sfo1",
   "env": {
     "VITE_FIREBASE_API_KEY": "@vite_firebase_api_key",
     "VITE_FIREBASE_AUTH_DOMAIN": "@vite_firebase_auth_domain",
