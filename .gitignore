@@ -20,4 +20,34 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables - NEVER commit these!
 .env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+
+# OS files
+.DS_Store
+Thumbs.db
+*.pem
+*.key
+*.crt
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build outputs
+build/
+.next/
+
+# Testing
+coverage/
+.nyc_output/
+
