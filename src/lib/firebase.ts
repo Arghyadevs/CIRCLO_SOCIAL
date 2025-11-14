@@ -14,6 +14,15 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+// Validate required Firebase configuration
+const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
+
+if (missingFields.length > 0) {
+  console.error('❌ Missing required Firebase environment variables:', missingFields.map(f => `VITE_FIREBASE_${f.replace(/[A-Z]/g, m => '_' + m).toUpperCase()}`).join(', '));
+  throw new Error(`Missing Firebase configuration: ${missingFields.join(', ')}. Please add the required environment variables to your deployment.`);
+}
+
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
