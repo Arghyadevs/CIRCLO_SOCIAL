@@ -46,6 +46,8 @@ RUN npm install -g serve
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
+# Expose is informational; we still bind to the PORT env var at runtime
 EXPOSE 3000
 
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Use the PORT environment variable if provided by the host (fallback to 3000)
+CMD ["sh", "-c", "serve -s dist -l ${PORT:-3000}"]
