@@ -65,23 +65,29 @@ cd ..
 
 3. **Configure environment variables**
 
-Create `.env` in root:
-```env
-VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-VITE_API_URL=http://localhost:4000/api
+**Frontend (.env in root directory):**
+```bash
+# Copy the .env file from template
+cp .env.example .env
+
+# Edit .env and add your Clerk publishable key
+# VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+# VITE_API_URL=/api (uses Vite proxy to avoid CORS)
 ```
 
-Create `server/.env`:
-```env
-MONGO_URI=mongodb://127.0.0.1:27017/circlo_social
-CLERK_JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
-YOUR_CLERK_PUBLIC_KEY_HERE
------END PUBLIC KEY-----"
-PORT=4000
-NODE_ENV=development
-CLIENT_ORIGIN=http://localhost:5173
-SKIP_AUTH=true
+**Backend (server/.env):**
+```bash
+# Copy the server .env file from template
+cp server/.env.example server/.env
+
+# Edit server/.env and configure:
+# - MONGO_URI (default: mongodb://127.0.0.1:27017/circlo_social)
+# - CLERK_JWT_PUBLIC_KEY (from Clerk Dashboard -> API Keys)
+# - PORT=4000
+# - CLIENT_ORIGIN=http://localhost:5173
 ```
+
+> 💡 **Note:** For local development, you can set `SKIP_AUTH=true` in server/.env to bypass authentication. Remove this for production!
 
 4. **Start MongoDB**
 ```bash
