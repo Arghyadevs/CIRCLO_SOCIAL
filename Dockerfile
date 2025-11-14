@@ -3,17 +3,14 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files (lockfile too if present) and install dependencies
 COPY package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production && \
-    npm ci
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application (pass VITE_* args from build environment if needed)
 ARG VITE_FIREBASE_API_KEY
 ARG VITE_FIREBASE_AUTH_DOMAIN
 ARG VITE_FIREBASE_PROJECT_ID
@@ -43,18 +40,12 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Install serve to run the application
+# Install serve to run the static build
 RUN npm install -g serve
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Expose port
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-
-# Start the application
 CMD ["serve", "-s", "dist", "-l", "3000"]
