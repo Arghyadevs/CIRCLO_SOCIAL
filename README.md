@@ -68,7 +68,7 @@ cd ..
 Create `.env` in root:
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
-VITE_API_URL=http://localhost:4000/api
+VITE_API_URL=http://localhost:3000/api
 ```
 
 Create `server/.env`:
@@ -77,7 +77,7 @@ MONGO_URI=mongodb://127.0.0.1:27017/circlo_social
 CLERK_JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
 YOUR_CLERK_PUBLIC_KEY_HERE
 -----END PUBLIC KEY-----"
-PORT=4000
+PORT=3000
 NODE_ENV=development
 CLIENT_ORIGIN=http://localhost:5173
 SKIP_AUTH=true
@@ -142,7 +142,7 @@ See [server/README.md](server/README.md) for detailed API documentation.
 
 ### Quick Reference
 
-**Base URL:** `http://localhost:4000/api`
+**Base URL:** `http://localhost:3000/api`
 
 **Authentication:** All endpoints (except `/health`) require Clerk JWT token:
 ```

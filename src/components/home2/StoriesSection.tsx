@@ -29,8 +29,8 @@ export default function StoriesSection() {
   const makeAbsolute = (url: string) => {
     if (!url) return url;
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    // derive base from VITE_API_URL or fallback to localhost:4000
-    const apiRoot = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000/api";
+    // derive base from VITE_API_URL or fallback to localhost:3000
+    const apiRoot = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:3000/api";
     const origin = apiRoot.replace(/\/api\/?$/, "");
     if (url.startsWith("/")) return `${origin}${url}`;
     return `${origin}/${url}`;
