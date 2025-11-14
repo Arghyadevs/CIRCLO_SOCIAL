@@ -97,8 +97,13 @@ Or manually test:
 
 - [ ] `VITE_API_URL` - **Add: https://circlo-social.onrender.com/api**
 - [ ] `VITE_CLERK_PUBLISHABLE_KEY` - **Add from Clerk Dashboard**
-- [ ] `VITE_FIREBASE_PROJECT_ID` - Optional
-- [ ] `VITE_FIREBASE_API_KEY` - Optional
+- [ ] `VITE_FIREBASE_API_KEY` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_AUTH_DOMAIN` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_PROJECT_ID` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_STORAGE_BUCKET` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_MESSAGING_SENDER_ID` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_APP_ID` - **Required** (from Firebase Console)
+- [ ] `VITE_FIREBASE_MEASUREMENT_ID` - **Required** (from Firebase Console)
 
 ---
 

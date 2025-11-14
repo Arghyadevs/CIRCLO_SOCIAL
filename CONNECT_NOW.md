@@ -38,11 +38,28 @@ Environment: ✅ Production ✅ Preview ✅ Development
 3. Go to: **API Keys**
 4. Copy the **Publishable Key** (starts with `pk_`)
 
-### 💡 Optional: Add Firebase (if you use it)
+### 🔥 Required: Add Firebase Variables
 ```
-VITE_FIREBASE_PROJECT_ID=circlo-d9991
-VITE_FIREBASE_AUTH_DOMAIN=circlo-d9991.firebaseapp.com
+VITE_FIREBASE_API_KEY=[Your Firebase API Key]
+VITE_FIREBASE_AUTH_DOMAIN=[Your Project].firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=[Your Project ID]
+VITE_FIREBASE_STORAGE_BUCKET=[Your Project].firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=[Your Sender ID]
+VITE_FIREBASE_APP_ID=[Your App ID]
+VITE_FIREBASE_MEASUREMENT_ID=[Your Measurement ID]
 ```
+
+**Why required?** Your app uses Firebase for:
+- Real-time reactions and likes
+- Chat functionality
+- Firebase Authentication
+
+**How to get these:**
+1. Go to: https://console.firebase.google.com
+2. Select your project
+3. Go to: **Project Settings** → **General**
+4. Scroll to **Your apps** → **SDK setup and configuration**
+5. Copy all the config values
 
 ---
 
