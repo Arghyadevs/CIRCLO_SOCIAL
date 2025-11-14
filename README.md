@@ -2,10 +2,25 @@
 
 A modern, full-stack social media platform built with React, TypeScript, Express, and MongoDB.
 
+---
+
+## 🔥 **DEPLOYED & NEED TO CONNECT?**
+
+### Your App:
+- ✅ Frontend: https://circlo-devs7.vercel.app
+- ✅ Backend: https://circlo-social.onrender.com
+
+### 👉 **[CLICK HERE TO CONNECT NOW](./CONNECT_NOW.md)** 👈
+*Takes only 10 minutes!*
+
+---
+
 > 🚀 **Quick Links:**
-> - [Quick Start Guide](./QUICKSTART.md) - Get running in 5 minutes
-> - [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Deploy to production
-> - [Docker Setup](./DOCKER_SETUP.md) - Run with Docker Compose
+> - 🔌 **[Connect Deployment](./CONNECT_NOW.md)** - Connect Vercel & Render (10 min)
+> - 📖 [Vercel + Render Setup](./VERCEL_RENDER_SETUP.md) - Detailed connection guide
+> - ⚡ [Quick Start Guide](./QUICKSTART.md) - Local development (5 min)
+> - 🚀 [Deployment Guide](./DEPLOYMENT_GUIDE.md) - All platforms
+> - 🐳 [Docker Setup](./DOCKER_SETUP.md) - Run with Docker Compose
 
 ## ✨ Features
 
