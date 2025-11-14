@@ -2,6 +2,11 @@
 
 A modern, full-stack social media platform built with React, TypeScript, Express, and MongoDB.
 
+> 🚀 **Quick Links:**
+> - [Quick Start Guide](./QUICKSTART.md) - Get running in 5 minutes
+> - [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Deploy to production
+> - [Docker Setup](./DOCKER_SETUP.md) - Run with Docker Compose
+
 ## ✨ Features
 
 - 🔐 **Authentication** - Secure auth with Clerk
