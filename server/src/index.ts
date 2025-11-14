@@ -108,5 +108,5 @@ app.post('/api/firebase/custom-token', async (req, res) => {
   }
 });
 
-const port = Number(process.env.PORT || 4000);
+const port = Number(process.env.PORT || 3000);
 app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
