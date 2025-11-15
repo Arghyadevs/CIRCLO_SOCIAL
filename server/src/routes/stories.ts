@@ -9,8 +9,8 @@ const router = Router();
 // configure multer storage to server/uploads
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 const storage = multer.diskStorage({
-  destination: (_req: Request, _file: any, cb: (error: Error | null, destination: string) => void) => cb(null, UPLOAD_DIR),
-  filename: (_req: Request, file: any, cb: (error: Error | null, filename: string) => void) => cb(null, `${Date.now()}_${file.originalname}`),
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => cb(null, UPLOAD_DIR),
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => cb(null, `${Date.now()}_${file.originalname}`),
 });
 
 const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
@@ -28,7 +28,7 @@ router.get('/', async (req: Request, res: Response) => {
     // only return stories from the last 24 hours; TTL index also handles expiry
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const docs = await StoryModel.find({ createdAt: { $gte: since } }).sort({ createdAt: -1 }).lean();
-    const withUrls = docs.map((d: any) => ({ ...d, url: d.url.startsWith('http') ? d.url : publicUrl(req, d.url) }));
+    const withUrls = docs.map((d) => ({ ...d, url: (d as { url: string }).url.startsWith('http') ? (d as { url: string }).url : publicUrl(req, (d as { url: string }).url) }));
     res.json({ stories: withUrls });
   } catch (err) {
     console.error('Failed to fetch stories', err);
@@ -37,7 +37,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // POST /api/stories - accepts multipart 'file' and optional 'text' (auth optional for dev)
-router.post('/', upload.single('file'), async (req: AuthedRequest & { file?: any; body: any }, res: Response) => {
+router.post('/', upload.single('file'), async (req: AuthedRequest & { file?: Express.Multer.File; body: { authorId?: string; text?: string } }, res: Response) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   try {
     const file = req.file;
@@ -53,17 +53,18 @@ router.post('/', upload.single('file'), async (req: AuthedRequest & { file?: any
     });
     const result = { ...doc.toObject(), url: publicUrl(req, doc.url) };
     res.status(201).json({ story: result });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to create story', err);
-    if (err.code === 'LIMIT_FILE_SIZE') {
+    if (err && typeof err === 'object' && 'code' in err && err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ error: 'File too large. Max 200MB' });
     }
-    res.status(500).json({ error: 'Failed to create story', details: err.message || String(err) });
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(500).json({ error: 'Failed to create story', details: message });
   }
 });
 
 // PATCH /api/stories/:id - update story text and/or replace file
-router.patch('/:id', upload.single('file'), async (req: AuthedRequest & { file?: any; body: any }, res: Response) => {
+router.patch('/:id', upload.single('file'), async (req: AuthedRequest & { file?: Express.Multer.File; body: { text?: string } }, res: Response) => {
   try {
     const id = req.params.id;
     const doc = await StoryModel.findById(id);

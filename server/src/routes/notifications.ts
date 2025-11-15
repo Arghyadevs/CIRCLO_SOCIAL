@@ -13,17 +13,17 @@ router.get('/', async (req: AuthedRequest, res) => {
     const items = await Notification.find({ userId }).sort({ createdAt: -1 }).limit(100).lean();
     
     // Fetch actor info for each notification
-    const actorIds = [...new Set(items.map((n: any) => n.actorId))];
+    const actorIds = [...new Set(items.map((n) => (n as { actorId: string }).actorId))];
     const actors = await User.find({ clerkId: { $in: actorIds } }).lean();
-    const actorMap: Record<string, any> = {};
-    actors.forEach((u: any) => {
-      actorMap[u.clerkId] = u;
+    const actorMap: Record<string, unknown> = {};
+    actors.forEach((u) => {
+      actorMap[(u as { clerkId: string }).clerkId] = u;
     });
     
-    const enriched = items.map((n: any) => ({
+    const enriched = items.map((n) => ({
       ...n,
-      actor: actorMap[n.actorId] || null,
-      isRead: !!n.readAt,
+      actor: actorMap[(n as { actorId: string }).actorId] || null,
+      isRead: !!(n as { readAt?: Date }).readAt,
     }));
     
     res.json(enriched);
