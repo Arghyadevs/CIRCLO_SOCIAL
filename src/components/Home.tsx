@@ -55,7 +55,7 @@ export default function Home() {
         // Use the Clerk JWT template named "firebase" (configure in Clerk Dashboard)
         const token = await getToken({ template: "firebase" });
         if (!token) return;
-        const base = (import.meta.env.VITE_API_URL?.replace(/\/$/, "")) || "http://localhost:4000/api";
+        const base = (import.meta.env.VITE_API_URL?.replace(/\/$/, "")) || "http://localhost:3000/api";
         await ensureFirebaseAuth(`${base}/firebase/custom-token`, token);
       } catch (e) {
         // eslint-disable-next-line no-console

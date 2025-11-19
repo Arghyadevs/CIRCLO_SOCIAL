@@ -32,7 +32,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Server will run on `http://localhost:4000`
+Server will run on `http://localhost:3000`
 
 ## 📁 Project Structure
 
@@ -175,7 +175,7 @@ npm start
 |----------|-------------|---------|
 | `MONGO_URI` | MongoDB connection string | `mongodb://127.0.0.1:27017/circlo_social` |
 | `CLERK_JWT_PUBLIC_KEY` | Clerk JWT public key (PEM format) | - |
-| `PORT` | Server port | `4000` |
+| `PORT` | Server port | `3000` |
 | `NODE_ENV` | Environment | `development` |
 | `CLIENT_ORIGIN` | CORS allowed origins (comma-separated) | `*` |
 | `SKIP_AUTH` | Skip authentication (dev only) | `false` |

@@ -132,7 +132,7 @@ export default function FeedSection() {
             <p className="text-yellow-700 mb-2">Please ensure:</p>
             <ol className="list-decimal list-inside text-yellow-700 space-y-1 ml-2">
               <li>MongoDB is running on port 27017</li>
-              <li>Backend server is running on port 4000</li>
+              <li>Backend server is running on port 3000</li>
             </ol>
             <p className="text-yellow-700 mt-3">
               Run: <code className="bg-yellow-100 px-2 py-1 rounded">cd server && npm run dev</code>

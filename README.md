@@ -85,27 +85,8 @@ cd ..
 
 3. **Configure environment variables**
 
-**Frontend (.env in root directory):**
-```bash
-# Copy the .env file from template
-cp .env.example .env
 
-# Edit .env and add your Clerk publishable key
-# VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-# VITE_API_URL=/api (uses Vite proxy to avoid CORS)
-```
 
-**Backend (server/.env):**
-```bash
-# Copy the server .env file from template
-cp server/.env.example server/.env
-
-# Edit server/.env and configure:
-# - MONGO_URI (default: mongodb://127.0.0.1:27017/circlo_social)
-# - CLERK_JWT_PUBLIC_KEY (from Clerk Dashboard -> API Keys)
-# - PORT=4000
-# - CLIENT_ORIGIN=http://localhost:5173
-```
 
 > 💡 **Note:** For local development, you can set `SKIP_AUTH=true` in server/.env to bypass authentication. Remove this for production!
 
@@ -168,7 +149,7 @@ See [server/README.md](server/README.md) for detailed API documentation.
 
 ### Quick Reference
 
-**Base URL:** `http://localhost:4000/api`
+**Base URL:** `http://localhost:3000/api`
 
 **Authentication:** All endpoints (except `/health`) require Clerk JWT token:
 ```
