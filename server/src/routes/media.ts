@@ -9,8 +9,8 @@ const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
 
 // Multer storage config
 const storage = multer.diskStorage({
-  destination: (_req: Request, _file: any, cb: (error: Error | null, destination: string) => void) => cb(null, UPLOAD_DIR),
-  filename: (_req: Request, file: any, cb: (error: Error | null, filename: string) => void) => cb(null, `${Date.now()}_${file.originalname}`),
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => cb(null, UPLOAD_DIR),
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => cb(null, `${Date.now()}_${file.originalname}`),
 });
 
 const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } });
@@ -23,10 +23,10 @@ function publicUrl(req: Request, relativePath: string) {
 }
 
 // POST /api/media - upload a single file and return its public URL and detected type
-router.post('/', upload.single('file'), async (req: Request & { file?: any }, res: Response) => {
+router.post('/', upload.single('file'), async (req: Request & { file?: Express.Multer.File }, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    const file = req.file as any;
+    const file = req.file;
     const type: 'image' | 'video' = file.mimetype?.startsWith('video') ? 'video' : 'image';
     const relativeUrl = `/uploads/${file.filename}`;
     const url = publicUrl(req, relativeUrl);
@@ -37,8 +37,8 @@ router.post('/', upload.single('file'), async (req: Request & { file?: any }, re
       filename: file.originalname,
       size: file.size,
     });
-  } catch (err: any) {
-    if (err?.code === 'LIMIT_FILE_SIZE') {
+  } catch (err) {
+    if (err && typeof err === 'object' && 'code' in err && err.code === 'LIMIT_FILE_SIZE') {
       return res.status(413).json({ error: 'File too large. Max 200MB' });
     }
     console.error('Media upload failed:', err);

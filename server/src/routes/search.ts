@@ -65,7 +65,7 @@ router.get('/', async (req, res) => {
     }
 
     const searchRegex = new RegExp(q, 'i');
-    const results: any = {};
+    const results: { users?: unknown[]; posts?: unknown[] } = {};
 
     if (type === 'users' || type === 'all') {
       results.users = await User.find({

@@ -27,16 +27,16 @@ router.get('/', async (req, res) => {
       .lean();
 
     // Load author profiles in bulk to avoid many requests from the client
-    const authorIds = [...new Set(comments.map((c: any) => c.authorId))];
+    const authorIds = [...new Set(comments.map((c) => (c as { authorId: string }).authorId))];
     const users = await User.find({ clerkId: { $in: authorIds } }).lean();
-    const userMap: Record<string, any> = {};
-    users.forEach((u: any) => {
-      userMap[u.clerkId] = u;
+    const userMap: Record<string, unknown> = {};
+    users.forEach((u) => {
+      userMap[(u as { clerkId: string }).clerkId] = u;
     });
 
-    const enriched = comments.map((c: any) => ({
+    const enriched = comments.map((c) => ({
       ...c,
-      author: userMap[c.authorId] || null
+      author: userMap[(c as { authorId: string }).authorId] || null
     }));
 
     res.json(enriched);

@@ -78,7 +78,7 @@ if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR);
 app.use(
   '/uploads',
   express.static(UPLOAD_DIR, {
-    setHeaders: (res, _path, _stat) => {
+    setHeaders: (res) => {
       const origins = process.env.CLIENT_ORIGIN?.split(',');
       const allow = origins && origins.length > 0 ? origins[0] : '*';
       res.setHeader('Access-Control-Allow-Origin', allow);
@@ -97,12 +97,12 @@ app.use('/api/media', mediaRouter);
 // Custom token endpoint for Firebase Auth (Clerk -> Firebase bridge)
 app.post('/api/firebase/custom-token', async (req, res) => {
   try {
-    const uid = (req as any).auth?.userId;
+    const uid = (req as { auth?: { userId?: string } }).auth?.userId;
     if (!uid) return res.status(401).json({ error: 'Unauthorized' });
     const admin = getFirebaseAdmin();
     const token = await admin.auth().createCustomToken(uid);
     res.json({ token });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to create Firebase custom token:', err);
     res.status(500).json({ error: 'Failed to create custom token' });
   }

@@ -21,7 +21,7 @@ interface ConversationDoc {
   participantsKey: string; // stable key for the pair
   lastMessageText?: string;
   lastMessageSenderId?: string;
-  updatedAt?: any;
+  updatedAt?: { seconds?: number };
 }
 
 // New: message type for DM
@@ -31,7 +31,7 @@ interface DMMessageDoc {
   fromId: string;
   toId: string;
   participantsKey: string;
-  createdAt?: any;
+  createdAt?: { seconds?: number };
 }
 
 // Utility: stable key for a pair of user IDs
@@ -39,23 +39,23 @@ const getParticipantsKey = (a: string, b: string) => {
   return [a, b].sort().join("__");
 };
 
-interface ResolvedUser { id: string; user?: any }
+interface ResolvedUser { id: string; user?: unknown }
 
 // Resolve a username (with optional leading @) to a user ID via search API (no hooks at module scope)
 async function resolveUserIdByUsername(raw: string): Promise<ResolvedUser | null> {
   const handle = raw.trim().replace(/^@/, "");
   if (!handle) return null;
   try {
-    const results: any = await searchApi.searchUsers(handle);
-    const list: any[] = Array.isArray(results) ? results : (results?.users || []);
+    const results: unknown = await searchApi.searchUsers(handle);
+    const list: unknown[] = Array.isArray(results) ? results : ((results as { users?: unknown[] })?.users || []);
     const normalized = list
-      .map((u: any) => ({
+      .map((u) => ({
         original: u,
-        id: u.clerkId || u.id || u._id,
-        username: (u.username || "").toLowerCase(),
+        id: (u as { clerkId?: string; id?: string; _id?: string }).clerkId || (u as { clerkId?: string; id?: string; _id?: string }).id || (u as { clerkId?: string; id?: string; _id?: string })._id,
+        username: ((u as { username?: string }).username || "").toLowerCase(),
       }))
-      .filter((r: any) => r.id && typeof r.id === 'string');
-    const exact = normalized.find((u: any) => u.username === handle.toLowerCase());
+      .filter((r) => r.id && typeof r.id === 'string');
+    const exact = normalized.find((u) => u.username === handle.toLowerCase());
     const chosen = exact || normalized[0];
     if (chosen?.id && typeof chosen.id === 'string' && chosen.id.startsWith('user_')) {
       return { id: chosen.id, user: chosen.original };
@@ -176,16 +176,16 @@ export default function ChatSection({ initialPartnerId }: Props) {
   }, [currentUserId, selectedPartnerId, firebaseReady]);
 
   // Helper: normalize search results (prefer Clerk IDs)
-  const normalizeUsers = (results: any) => {
-    const list: any[] = Array.isArray(results) ? results : (results?.users || []);
-    return list
-      .map((u: any) => ({
-        id: u.clerkId || u.id || u._id,
-        username: u.username || u.handle || "",
-        name: u.name || u.fullName || "",
-        avatarUrl: u.avatarUrl || u.imageUrl || u.photoURL || "",
-      }))
-      .filter((u: any) => typeof u.id === 'string' && u.id.startsWith('user_') && (u.username || u.name));
+  const normalizeUsers = (results: unknown): { id: string; username: string; name?: string; avatarUrl?: string }[] => {
+    const list: unknown[] = Array.isArray(results) ? results : ((results as { users?: unknown[] })?.users || []);
+    const mapped = list
+      .map((u) => ({
+        id: (u as { clerkId?: string; id?: string; _id?: string }).clerkId || (u as { clerkId?: string; id?: string; _id?: string }).id || (u as { clerkId?: string; id?: string; _id?: string })._id || "",
+        username: (u as { username?: string; handle?: string }).username || (u as { username?: string; handle?: string }).handle || "",
+        name: (u as { name?: string; fullName?: string }).name || (u as { name?: string; fullName?: string }).fullName || "",
+        avatarUrl: (u as { avatarUrl?: string; imageUrl?: string; photoURL?: string }).avatarUrl || (u as { avatarUrl?: string; imageUrl?: string; photoURL?: string }).imageUrl || (u as { avatarUrl?: string; imageUrl?: string; photoURL?: string }).photoURL || "",
+      }));
+    return mapped.filter((u) => typeof u.id === 'string' && u.id.startsWith('user_') && (Boolean(u.username) || Boolean(u.name)));
   };
 
   // Debounced username search
