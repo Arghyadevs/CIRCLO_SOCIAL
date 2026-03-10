@@ -6,18 +6,7 @@ import "./index.css";
 import { AppStateProvider } from "./context/AppState";
 import { ThemeProvider } from "./context/ThemeContext";
 import { ErrorBoundary } from "./components/shared/ErrorBoundary";
-import { ClerkProvider } from "@clerk/clerk-react";
-
-/* ----------------------------------
-   🔑 Clerk Environment Setup
----------------------------------- */
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error(
-    "❌ Missing Clerk Publishable Key. Please add VITE_CLERK_PUBLISHABLE_KEY to your .env file."
-  );
-}
+import { AuthProvider } from "./context/AuthContext";
 
 /* ----------------------------------
    ⚙️ DOM Setup and Splash Logic
@@ -39,7 +28,7 @@ document.body.style.overflow = "hidden";
 ---------------------------------- */
 createRoot(rootEl).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    <AuthProvider>
       <ThemeProvider>
         <AppStateProvider>
           <ErrorBoundary>
@@ -47,7 +36,7 @@ createRoot(rootEl).render(
           </ErrorBoundary>
         </AppStateProvider>
       </ThemeProvider>
-    </ClerkProvider>
+    </AuthProvider>
   </StrictMode>
 );
 

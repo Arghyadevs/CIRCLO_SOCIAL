@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SendHorizonal } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "../../context/AuthContext";
 import { messagesApi, profilesApi } from "../../utils/api";
 
 export default function MessagesSection() {
-  const { user: clerkUser } = useUser();
+  const { user: firebaseUser } = useAuth();
   const [conversations, setConversations] = useState<any[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -32,7 +32,7 @@ export default function MessagesSection() {
     try {
       setLoading(true);
       const data = await messagesApi.getConversations();
-      
+
       // Fetch user data for each conversation partner
       const userIds = data.map((conv: any) => conv._id);
       const userPromises = userIds.map(async (id: string) => {
@@ -77,7 +77,7 @@ export default function MessagesSection() {
 
     const optimisticMessage = {
       _id: Date.now().toString(),
-      fromId: clerkUser?.id,
+      fromId: firebaseUser?.uid,
       toId: selected,
       text: input,
       createdAt: new Date().toISOString(),
@@ -156,11 +156,10 @@ export default function MessagesSection() {
               <div
                 key={conv._id}
                 onClick={() => setSelected(conv._id)}
-                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-                  selected === conv._id
+                className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${selected === conv._id
                     ? "bg-purple-100 shadow-sm"
                     : "hover:bg-purple-50"
-                }`}
+                  }`}
               >
                 <img
                   src={avatar}
@@ -194,7 +193,7 @@ export default function MessagesSection() {
               <div className="flex flex-col space-y-3">
                 <AnimatePresence>
                   {messages.map((msg, i) => {
-                    const isMe = msg.fromId === clerkUser?.id;
+                    const isMe = msg.fromId === firebaseUser?.uid;
                     return (
                       <motion.div
                         key={msg._id || i}
@@ -202,11 +201,10 @@ export default function MessagesSection() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className={`max-w-[75%] p-3 rounded-2xl ${
-                          isMe
+                        className={`max-w-[75%] p-3 rounded-2xl ${isMe
                             ? "bg-purple-600 text-white self-end rounded-br-none"
                             : "bg-gray-200 text-gray-800 self-start rounded-bl-none"
-                        }`}
+                          }`}
                       >
                         {msg.text}
                       </motion.div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../../../context/AuthContext";
 import { Heart, X } from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { commentsApi, profilesApi, searchApi } from "@/utils/api";
@@ -47,7 +47,7 @@ export default function CommentSection({ postId, onClose }: CommentSectionProps)
       users.forEach((user) => {
         if (user) newUserCache[user.clerkId] = user;
       });
-      
+
       setUserCache(newUserCache);
     } catch (err) {
       console.error('Error fetching comments:', err);
@@ -100,7 +100,7 @@ export default function CommentSection({ postId, onClose }: CommentSectionProps)
       setInput(newText);
       setShowMentions(false);
       setMentionQuery("");
-      
+
       // Focus back on input
       if (inputRef.current) {
         inputRef.current.focus();
@@ -263,11 +263,10 @@ export default function CommentSection({ postId, onClose }: CommentSectionProps)
                 >
                   <Heart
                     size={16}
-                    className={`transition-all duration-200 ${
-                      c.isLiked
+                    className={`transition-all duration-200 ${c.isLiked
                         ? 'fill-red-500 text-red-500 scale-110'
                         : 'text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400'
-                    }`}
+                      }`}
                   />
                 </button>
               </div>
@@ -315,11 +314,10 @@ export default function CommentSection({ postId, onClose }: CommentSectionProps)
                         key={user.clerkId}
                         type="button"
                         onClick={() => handleSelectMention(username)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-purple-50 dark:hover:bg-gray-700/50 transition-colors ${
-                          index !== mentions.length - 1
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 hover:bg-purple-50 dark:hover:bg-gray-700/50 transition-colors ${index !== mentions.length - 1
                             ? 'border-b border-gray-100 dark:border-gray-700'
                             : ''
-                        }`}
+                          }`}
                       >
                         <img
                           src={avatar}

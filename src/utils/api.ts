@@ -1,11 +1,11 @@
 // src/utils/api.ts
-import type { 
-  User, 
-  Post, 
-  Comment, 
-  Story, 
-  Message, 
-  Conversation, 
+import type {
+  User,
+  Post,
+  Comment,
+  Story,
+  Message,
+  Conversation,
   Notification,
   Reel,
   PaginatedResponse,
@@ -42,17 +42,15 @@ async function authenticatedFetch(url: string, options: RequestInit = {}): Promi
     ? { ...(options.headers || {}) }
     : { 'Content-Type': 'application/json', ...(options.headers || {}) };
 
-  // Get Clerk session token for authentication
+  // Get Firebase Auth ID token for authentication
   let authToken: string | null = null;
   try {
-    if ((window as any).Clerk) {
-      const clerk = (window as any).Clerk;
-      if (clerk.session) {
-        authToken = await clerk.session.getToken();
-      }
+    const { auth } = await import('@/lib/firebase');
+    if (auth.currentUser) {
+      authToken = await auth.currentUser.getIdToken();
     }
   } catch (err) {
-    console.warn('Could not get Clerk token:', err);
+    console.warn('Could not get Firebase ID token:', err);
   }
 
   if (authToken) {
@@ -205,11 +203,11 @@ export const profilesApi = {
     return handleResponse<User>(response);
   },
 
-  async updateProfile(data: { 
-    username?: string; 
-    name?: string; 
-    bio?: string; 
-    avatarUrl?: string; 
+  async updateProfile(data: {
+    username?: string;
+    name?: string;
+    bio?: string;
+    avatarUrl?: string;
     links?: string[];
     isPrivate?: boolean;
   }): Promise<User> {

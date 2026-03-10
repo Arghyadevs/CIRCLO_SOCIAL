@@ -11,9 +11,8 @@ import {
   Sun,
   Moon,
 } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton, UserButton, useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import UserProfileModal from "./home2/UserProfileModal";
-import { ensureFirebaseAuth } from "../lib/firebase";
 
 // 🧩 Lazy load all Circlo dashboard sections
 const FriendsSection = lazy(() => import("./home2/FriendsSection"));
@@ -45,24 +44,7 @@ export default function Home() {
 
   const [darkTheme, setDarkTheme] = useState(false);
 
-  const { getToken, isSignedIn } = useAuth();
-
-  // Bridge Clerk to Firebase Auth
-  useEffect(() => {
-    (async () => {
-      if (!isSignedIn) return;
-      try {
-        // Use the Clerk JWT template named "firebase" (configure in Clerk Dashboard)
-        const token = await getToken({ template: "firebase" });
-        if (!token) return;
-        const base = (import.meta.env.VITE_API_URL?.replace(/\/$/, "")) || "http://localhost:4000/api";
-        await ensureFirebaseAuth(`${base}/firebase/custom-token`, token);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn("Firebase custom token sign-in failed", e);
-      }
-    })();
-  }, [isSignedIn, getToken]);
+  const { user: authUser, signOut } = useAuth();
 
   // Listen for global chat open events from anywhere in the app
   useEffect(() => {
@@ -244,18 +226,16 @@ export default function Home() {
   --------------------------------- */
   return (
     <div
-      className={`min-h-screen font-[Outfit] transition-colors duration-700 ${
-        darkTheme
+      className={`min-h-screen font-[Outfit] transition-colors duration-700 ${darkTheme
           ? "bg-gradient-to-br from-gray-950 via-purple-950 to-gray-900"
           : "bg-gradient-to-br from-white via-purple-50 to-blue-50"
-      }`}
+        }`}
     >
       {/* 🔗 Top Bar with Clerk Controls */}
-      <div className={`sticky top-0 z-40 border-b transition-all duration-500 backdrop-blur-xl ${
-        darkTheme 
-          ? "bg-gray-950/80 border-gray-800/50" 
+      <div className={`sticky top-0 z-40 border-b transition-all duration-500 backdrop-blur-xl ${darkTheme
+          ? "bg-gray-950/80 border-gray-800/50"
           : "bg-white/80 border-gray-200/50"
-      }`}>
+        }`}>
         <div className="flex items-center justify-between px-6 py-1 max-w-full">
           {/* Logo */}
           <img
@@ -270,15 +250,14 @@ export default function Home() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
-                  activeTab === tab
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${activeTab === tab
                     ? darkTheme
                       ? "bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30"
                       : "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-400/30"
                     : darkTheme
-                    ? "text-gray-400 hover:text-gray-200 hover:bg-white/5"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
+                      ? "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                  }`}
               >
                 <Icon size={18} />
                 <span className="text-sm font-medium hidden xl:inline">{tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
@@ -290,52 +269,52 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setDarkTheme((prev) => !prev)}
-              className={`p-2 rounded-full transition-all duration-300 ${
-                darkTheme
+              className={`p-2 rounded-full transition-all duration-300 ${darkTheme
                   ? "bg-gradient-to-br from-yellow-500/20 to-orange-500/20 hover:from-yellow-500/30 hover:to-orange-500/30 text-yellow-400"
                   : "bg-gradient-to-br from-blue-100 to-purple-100 hover:from-blue-200 hover:to-purple-200 text-blue-600"
-              }`}
+                }`}
               title="Toggle Theme"
             >
               {darkTheme ? <Sun size={20} /> : <Moon size={20} />}
             </button>
 
-            <SignedIn>
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox:
-                      "w-10 h-10 rounded-full border-2 border-purple-400/50 shadow-lg hover:shadow-xl transition-all hover:border-purple-500",
-                  },
-                }}
+            {/* User Avatar */}
+            <div className="relative group">
+              <img
+                src={authUser?.photoURL || "/Public/Circlo_tp.png"}
+                alt={authUser?.displayName || "User"}
+                className="w-10 h-10 rounded-full border-2 border-purple-400/50 shadow-lg hover:shadow-xl transition-all hover:border-purple-500 cursor-pointer object-cover"
               />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="px-5 py-2 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                  Sign In
+              <div className={`absolute right-0 top-12 rounded-xl shadow-xl border py-2 px-1 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 ${darkTheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                }`}>
+                <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                  <p className={`text-sm font-semibold truncate ${darkTheme ? "text-gray-200" : "text-gray-800"}`}>{authUser?.displayName}</p>
+                  <p className={`text-xs truncate ${darkTheme ? "text-gray-400" : "text-gray-500"}`}>{authUser?.email}</p>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors mt-1"
+                >
+                  Sign Out
                 </button>
-              </SignInButton>
-            </SignedOut>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* 🧭 Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col justify-between w-72 fixed h-screen left-0 top-16 z-30 transition-all duration-500 ${
-          darkTheme 
-            ? "bg-gradient-to-b from-gray-950/50 to-gray-900/30 border-r border-gray-800/30 backdrop-blur-sm" 
+        className={`hidden md:flex flex-col justify-between w-72 fixed h-screen left-0 top-16 z-30 transition-all duration-500 ${darkTheme
+            ? "bg-gradient-to-b from-gray-950/50 to-gray-900/30 border-r border-gray-800/30 backdrop-blur-sm"
             : "bg-gradient-to-b from-white/50 to-purple-50/30 border-r border-gray-200/30 backdrop-blur-sm"
-        }`}
+          }`}
       >
         <div className="flex flex-col space-y-8 p-6">
           {/* Navigation */}
           <nav className="flex flex-col space-y-2">
-            <p className={`text-xs font-bold uppercase tracking-widest px-3 mb-2 ${
-              darkTheme ? "text-gray-500" : "text-gray-400"
-            }`}>
+            <p className={`text-xs font-bold uppercase tracking-widest px-3 mb-2 ${darkTheme ? "text-gray-500" : "text-gray-400"
+              }`}>
               Main Menu
             </p>
             {navItems.map(([tab, Icon]) => (
@@ -351,37 +330,32 @@ export default function Home() {
           </nav>
 
           {/* Quick Actions */}
-          <div className={`p-4 rounded-2xl border transition-all duration-300 ${
-            darkTheme
+          <div className={`p-4 rounded-2xl border transition-all duration-300 ${darkTheme
               ? "bg-gradient-to-br from-purple-950/40 to-blue-950/40 border-purple-500/20 hover:border-purple-500/40"
               : "bg-gradient-to-br from-purple-100/40 to-blue-100/40 border-purple-300/30 hover:border-purple-300/60"
-          }`}>
-            <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${
-              darkTheme ? "text-purple-400" : "text-purple-600"
             }`}>
+            <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${darkTheme ? "text-purple-400" : "text-purple-600"
+              }`}>
               Quick Actions
             </p>
-            <button className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all mb-2 ${
-              darkTheme
+            <button className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all mb-2 ${darkTheme
                 ? "bg-purple-600/30 hover:bg-purple-600/50 text-purple-200"
                 : "bg-purple-200/50 hover:bg-purple-300/50 text-purple-700"
-            }`}>
+              }`}>
               + Create Post
             </button>
-            <button className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
-              darkTheme
+            <button className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all ${darkTheme
                 ? "bg-blue-600/30 hover:bg-blue-600/50 text-blue-200"
                 : "bg-blue-200/50 hover:bg-blue-300/50 text-blue-700"
-            }`}>
+              }`}>
               👥 Find Friends
             </button>
           </div>
         </div>
 
         <div
-          className={`text-xs mt-auto text-center pb-4 px-3 ${
-            darkTheme ? "text-gray-500" : "text-gray-600"
-          }`}
+          className={`text-xs mt-auto text-center pb-4 px-3 ${darkTheme ? "text-gray-500" : "text-gray-600"
+            }`}
         >
           © {new Date().getFullYear()} Circlo • v1.0
         </div>
@@ -395,34 +369,31 @@ export default function Home() {
       </main>
 
       {/* 📱 Mobile Bottom Navigation */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 border-t transition-all duration-500 backdrop-blur-xl z-40 safe-area-inset-bottom ${
-        darkTheme
+      <nav className={`md:hidden fixed bottom-0 left-0 right-0 border-t transition-all duration-500 backdrop-blur-xl z-40 safe-area-inset-bottom ${darkTheme
           ? "bg-gray-950/80 border-gray-800/50"
           : "bg-white/80 border-gray-200/50"
-      }`}>
+        }`}>
         <div className="flex justify-around items-center h-20 px-2">
           {navItems.slice(0, 5).map(([tab, Icon]) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300 group ${
-                activeTab === tab
+              className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all duration-300 group ${activeTab === tab
                   ? darkTheme
                     ? 'text-purple-400'
                     : 'text-purple-600'
                   : darkTheme
-                  ? 'text-gray-500 group-hover:text-gray-300'
-                  : 'text-gray-500 group-hover:text-gray-700'
-              }`}
+                    ? 'text-gray-500 group-hover:text-gray-300'
+                    : 'text-gray-500 group-hover:text-gray-700'
+                }`}
               aria-label={tab.charAt(0).toUpperCase() + tab.slice(1)}
             >
-              <div className={`p-2 rounded-xl transition-all ${
-                activeTab === tab
+              <div className={`p-2 rounded-xl transition-all ${activeTab === tab
                   ? darkTheme
                     ? "bg-purple-600/30"
                     : "bg-purple-200/50"
                   : "bg-transparent group-hover:" + (darkTheme ? "bg-white/5" : "bg-white/30")
-              }`}>
+                }`}>
                 <Icon size={22} strokeWidth={activeTab === tab ? 2.5 : 2} />
               </div>
               <span className="text-xs font-semibold">{tab === "reels" ? "Reels" : tab.charAt(0).toUpperCase() + tab.slice(1)}</span>
@@ -466,26 +437,23 @@ function SidebarItem({
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-4 w-full text-left rounded-xl px-4 py-3 transition-all duration-300 group ${
-        active
+      className={`flex items-center gap-4 w-full text-left rounded-xl px-4 py-3 transition-all duration-300 group ${active
           ? theme
             ? "bg-gradient-to-r from-purple-600/40 to-purple-700/40 text-purple-200 font-semibold shadow-lg shadow-purple-500/20 border border-purple-500/30"
             : "bg-gradient-to-r from-purple-200/60 to-purple-300/40 text-purple-900 font-semibold shadow-lg shadow-purple-300/20 border border-purple-300/50"
           : theme
-          ? "text-gray-400 hover:text-gray-200 hover:bg-white/5 border border-transparent"
-          : "text-gray-600 hover:text-purple-700 hover:bg-white/40 border border-transparent"
-      }`}
+            ? "text-gray-400 hover:text-gray-200 hover:bg-white/5 border border-transparent"
+            : "text-gray-600 hover:text-purple-700 hover:bg-white/40 border border-transparent"
+        }`}
     >
-      <div className={`transition-transform duration-300 ${
-        active ? "scale-110" : "group-hover:scale-105"
-      }`}>
+      <div className={`transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-105"
+        }`}>
         {icon}
       </div>
       <span className="font-medium tracking-wide">{label}</span>
       {active && (
-        <div className={`ml-auto w-2 h-2 rounded-full ${
-          theme ? "bg-purple-400" : "bg-purple-600"
-        }`} />
+        <div className={`ml-auto w-2 h-2 rounded-full ${theme ? "bg-purple-400" : "bg-purple-600"
+          }`} />
       )}
     </button>
   );

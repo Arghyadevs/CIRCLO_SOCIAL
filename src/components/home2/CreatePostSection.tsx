@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useAuth } from "../../context/AuthContext";
 import { Image, Video, X } from "lucide-react";
 import { postsApi, mediaApi } from "../../utils/api";
 
@@ -8,7 +8,7 @@ interface CreatePostSectionProps {
 }
 
 export default function CreatePostSection({ onPostCreated }: CreatePostSectionProps) {
-  const { user: clerkUser } = useUser();
+  const { user: firebaseUser } = useAuth();
   const [text, setText] = useState("");
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export default function CreatePostSection({ onPostCreated }: CreatePostSectionPr
     // Validate file type
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
-    
+
     if (!isImage && !isVideo) {
       setError('Please select an image or video file');
       return;
@@ -112,7 +112,7 @@ export default function CreatePostSection({ onPostCreated }: CreatePostSectionPr
     }
   };
 
-  const userAvatar = clerkUser?.imageUrl || `https://api.dicebear.com/8.x/avataaars/svg?seed=${clerkUser?.id}`;
+  const userAvatar = firebaseUser?.photoURL || `https://api.dicebear.com/8.x/avataaars/svg?seed=${firebaseUser?.uid}`;
 
   return (
     <div className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-sm p-6 mb-6">
@@ -126,7 +126,7 @@ export default function CreatePostSection({ onPostCreated }: CreatePostSectionPr
           />
           <div className="flex-1">
             <p className="font-semibold text-gray-900">
-              {clerkUser?.username || clerkUser?.firstName || 'User'}
+              {firebaseUser?.displayName || 'User'}
             </p>
           </div>
         </div>

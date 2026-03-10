@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../../context/AuthContext";
 import { profilesApi, followsApi } from "../../utils/api";
 
 export default function FriendsSection() {
@@ -84,7 +84,7 @@ export default function FriendsSection() {
           const isFollowing = followingIds.has(user.clerkId);
           const username = user.username || user.name || 'User';
           const avatar = user.avatarUrl || `https://api.dicebear.com/8.x/avataaars/svg?seed=${user.clerkId}`;
-          
+
           return (
             <li key={user.clerkId} className="flex items-center gap-3">
               <img
@@ -101,11 +101,10 @@ export default function FriendsSection() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleFollow(user.clerkId)}
-                  className={`px-3 py-1.5 text-sm rounded-lg transition ${
-                    isFollowing
+                  className={`px-3 py-1.5 text-sm rounded-lg transition ${isFollowing
                       ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
                       : "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:opacity-90"
-                  }`}
+                    }`}
                 >
                   {isFollowing ? "Following" : "Follow"}
                 </button>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 import { profilesApi } from '@/utils/api';
 import type { User } from '@/types';
 
 /**
  * Hook to fetch and cache current user profile from database
- * Always use this instead of useUser() for display purposes
+ * Always use this instead of Firebase user for display purposes
  */
 export function useCurrentUserProfile() {
   const { userId } = useAuth();

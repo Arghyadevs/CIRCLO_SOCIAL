@@ -34,55 +34,6 @@ print_warning() {
     echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Check if Node.js is installed
-if ! command -v node &> /dev/null; then
-    print_error "Node.js is not installed. Please install Node.js 18 or later."
-    exit 1
-fi
-
-print_success "Node.js $(node --version) found"
-
-# Check if npm is installed
-if ! command -v npm &> /dev/null; then
-    print_error "npm is not installed"
-    exit 1
-fi
-
-print_success "npm $(npm --version) found"
-
-# Menu
-echo -e "\n${YELLOW}Select deployment platform:${NC}\n"
-echo "1) Vercel"
-echo "2) Netlify"
-echo "3) Docker"
-echo "4) Manual build only"
-echo "5) Exit"
-
-read -p "Enter your choice (1-5): " choice
-
-case $choice in
-    1)
-        deploy_vercel
-        ;;
-    2)
-        deploy_netlify
-        ;;
-    3)
-        deploy_docker
-        ;;
-    4)
-        build_only
-        ;;
-    5)
-        print_success "Exiting..."
-        exit 0
-        ;;
-    *)
-        print_error "Invalid choice"
-        exit 1
-        ;;
-esac
-
 # Function to deploy to Vercel
 deploy_vercel() {
     print_step "Preparing for Vercel deployment...\n"
@@ -184,12 +135,12 @@ deploy_docker() {
     # Check for environment variables
     if [ ! -f ".env.production" ]; then
         print_error "No .env.production file found!"
-        print_step "Creating .env.production from .env.production.example..."
-        if [ ! -f ".env.production.example" ]; then
-            print_error ".env.production.example not found"
+        print_step "Creating .env.production from .env.example..."
+        if [ ! -f ".env.example" ]; then
+            print_error ".env.example not found"
             exit 1
         fi
-        cp .env.production.example .env.production
+        cp .env.example .env.production
         print_warning "Please edit .env.production and fill in your values"
         exit 1
     fi
@@ -275,5 +226,51 @@ pre_deploy_checks() {
     fi
 }
 
-# Run pre-deploy checks
-pre_deploy_checks
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    print_error "Node.js is not installed. Please install Node.js 18 or later."
+    exit 1
+fi
+
+print_success "Node.js $(node --version) found"
+
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    print_error "npm is not installed"
+    exit 1
+fi
+
+print_success "npm $(npm --version) found"
+
+# Menu
+echo -e "\n${YELLOW}Select deployment platform:${NC}\n"
+echo "1) Vercel"
+echo "2) Netlify"
+echo "3) Docker"
+echo "4) Manual build only"
+echo "5) Exit"
+
+read -p "Enter your choice (1-5): " choice
+
+case $choice in
+    1)
+        deploy_vercel
+        ;;
+    2)
+        deploy_netlify
+        ;;
+    3)
+        deploy_docker
+        ;;
+    4)
+        build_only
+        ;;
+    5)
+        print_success "Exiting..."
+        exit 0
+        ;;
+    *)
+        print_error "Invalid choice"
+        exit 1
+        ;;
+esac

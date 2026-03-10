@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from './AuthContext';
 import { profilesApi, followsApi } from '../utils/api';
 
 export type User = {
@@ -93,21 +93,21 @@ function fileToDataUrl(file: File): Promise<string> {
 }
 
 export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user: clerkUser, isSignedIn } = useUser();
+  const { user: firebaseUser, isSignedIn } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [reels, setReels] = useState<Reel[]>([]);
-  
+
   // 👥 Followers/Following State
   const [followers, setFollowers] = useState<User[]>([]);
   const [following, setFollowing] = useState<User[]>([]);
   const [followerIds, setFollowerIds] = useState<Set<string>>(new Set());
   const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
-  // Fetch current user profile from MongoDB when Clerk user is available
+  // Fetch current user profile from MongoDB when Firebase user is available
   useEffect(() => {
-    if (isSignedIn && clerkUser) {
+    if (isSignedIn && firebaseUser) {
       fetchCurrentUser();
     } else {
       setCurrentUser(null);
@@ -116,7 +116,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setFollowerIds(new Set());
       setFollowingIds(new Set());
     }
-  }, [isSignedIn, clerkUser?.id]);
+  }, [isSignedIn, firebaseUser?.uid]);
 
   // 👥 Sync followers/following AFTER currentUser is fetched
   useEffect(() => {
@@ -129,16 +129,16 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             followsApi.getFollowers(currentUser.clerkId),
             followsApi.getFollowing(currentUser.clerkId),
           ]);
-          
+
           setFollowers(followersList || []);
           setFollowing(followingList || []);
-          
+
           const fIds = new Set(followersList?.map(u => u.clerkId) || []);
           const wIds = new Set(followingList?.map(u => u.clerkId) || []);
-          
+
           setFollowerIds(fIds);
           setFollowingIds(wIds);
-          
+
           console.log('✅ Followers synced:', followersList?.length || 0);
           console.log('✅ Following synced:', followingList?.length || 0);
         } catch (err) {
@@ -160,24 +160,24 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // 👥 Fetch followers and following for current user
   const fetchFollowersAndFollowing = useCallback(async () => {
     if (!currentUser?.clerkId) return;
-    
+
     try {
       console.log('📍 Syncing followers/following for:', currentUser.clerkId);
       const [followersList, followingList] = await Promise.all([
         followsApi.getFollowers(currentUser.clerkId),
         followsApi.getFollowing(currentUser.clerkId),
       ]);
-      
+
       setFollowers(followersList || []);
       setFollowing(followingList || []);
-      
+
       // Update IDs set for quick lookup
       const fIds = new Set(followersList?.map(u => u.clerkId) || []);
       const wIds = new Set(followingList?.map(u => u.clerkId) || []);
-      
+
       setFollowerIds(fIds);
       setFollowingIds(wIds);
-      
+
       console.log('✅ Followers synced:', followersList?.length || 0);
       console.log('✅ Following synced:', followingList?.length || 0);
     } catch (err) {
@@ -185,21 +185,20 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [currentUser?.clerkId]);
 
-  // 👥 Sync followers and following
   const syncFollowersFollowing = useCallback(async () => {
-    if (!currentUser?.clerkId && !clerkUser?.id) return;
+    if (!currentUser?.clerkId && !firebaseUser?.uid) return;
     await fetchFollowersAndFollowing();
-  }, [currentUser?.clerkId, clerkUser?.id, fetchFollowersAndFollowing]);
+  }, [currentUser?.clerkId, firebaseUser?.uid, fetchFollowersAndFollowing]);
 
   // 👥 Toggle follow status and sync
   const toggleFollow = useCallback(async (userId: string) => {
     try {
       console.log('🔄 Toggling follow for:', userId);
       await followsApi.toggleFollow(userId);
-      
+
       // Refresh followers/following after toggle
       await fetchFollowersAndFollowing();
-      
+
       console.log('✅ Follow toggled and synced');
     } catch (err) {
       console.error('❌ Error toggling follow:', err);
@@ -230,7 +229,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         username: patch.username,
         name: patch.name,
         bio: patch.bio,
-        avatarUrl: avatarUrl || clerkUser?.imageUrl,
+        avatarUrl: avatarUrl || firebaseUser?.photoURL || undefined,
         links: patch.links,
       });
 
@@ -247,8 +246,8 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // prevent duplicates or already accepted
     const exists = friendRequests.find(
       fr => ((fr.fromUserId === currentUser.clerkId && fr.toUserId === toUserId) ||
-             (fr.fromUserId === toUserId && fr.toUserId === currentUser.clerkId)) &&
-            fr.status === 'pending'
+        (fr.fromUserId === toUserId && fr.toUserId === currentUser.clerkId)) &&
+        fr.status === 'pending'
     );
     if (exists) return;
 
@@ -264,7 +263,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addPost = async (input: { text?: string; mediaFile?: File | null; linkUrl?: string; privacy: Privacy }) => {
     if (!currentUser) throw new Error('User not authenticated');
-    
+
     const { text, mediaFile, linkUrl, privacy } = input;
 
     if (!text && !mediaFile && !linkUrl) throw new Error('Post cannot be empty');
@@ -297,7 +296,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addReel = async (file: File) => {
     if (!currentUser) throw new Error('User not authenticated');
-    
+
     const isVideo = /video\/(mp4|webm)/i.test(file.type);
     if (!isVideo) throw new Error('Reel must be a video (MP4/WEBM)');
     const maxMB = 30;
@@ -313,11 +312,11 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     () => ({
       isAuthenticated: isSignedIn || false,
       currentUser: currentUser || {
-        clerkId: clerkUser?.id || "",
-        username: clerkUser?.username || undefined,
-        name: clerkUser?.fullName || undefined,
-        email: clerkUser?.primaryEmailAddress?.emailAddress || undefined,
-        avatarUrl: clerkUser?.imageUrl || undefined,
+        clerkId: firebaseUser?.uid || "",
+        username: firebaseUser?.displayName || undefined,
+        name: firebaseUser?.displayName || undefined,
+        email: firebaseUser?.email || undefined,
+        avatarUrl: firebaseUser?.photoURL || undefined,
         isVerified: false,
         isPrivate: false,
       },
@@ -349,7 +348,7 @@ export const AppStateProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [
       isSignedIn,
       currentUser,
-      clerkUser,
+      firebaseUser,
       friendRequests,
       posts,
       reels,
